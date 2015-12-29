@@ -1,0 +1,41 @@
+
+cmake_minimum_required(VERSION 2.8)
+
+PROJECT(Infovis)
+
+IF(NOT VTK_BINARY_DIR)
+FIND_PACKAGE(VTK REQUIRED)
+IF(NOT VTK_USE_RENDERING)
+  MESSAGE(FATAL_ERROR "Example ${PROJECT_NAME} requires VTK_USE_RENDERING.")
+ENDIF(NOT VTK_USE_RENDERING)
+IF(NOT VTK_USE_INFOVIS)
+  MESSAGE(FATAL_ERROR "Example ${PROJECT_NAME} requires VTK_USE_INFOVIS.")
+ENDIF(NOT VTK_USE_INFOVIS)
+INCLUDE(${VTK_USE_FILE})
+ENDIF(NOT VTK_BINARY_DIR)
+
+IF(VTK_USE_VIEWS)
+  ADD_EXECUTABLE(TreeLayoutView CreateTreeLayout.cpp newick.cpp newick_file.cpp tree.cpp )
+  TARGET_LINK_LIBRARIES(TreeLayoutView  vtkViews vtkInfovis vtkRendering vtkImaging vtkIO)
+
+  ADD_EXECUTABLE(HierarchicalGraphView CreateHierarchicalGraphView.cpp newick.cpp newick_file.cpp tree.cpp )
+  TARGET_LINK_LIBRARIES(HierarchicalGraphView  vtkViews vtkInfovis vtkRendering vtkImaging vtkIO)
+ENDIF(VTK_USE_VIEWS)
+
+# If Qt is enabled include the EasyView example
+IF(VTK_USE_QVTK)
+  IF(VTK_USE_QTCHARTS)
+    ADD_SUBDIRECTORY(ChartView)
+  ENDIF()
+ENDIF(VTK_USE_QVTK)
+
+IF(VTK_USE_PARALLEL_BGL)
+  ADD_EXECUTABLE(ParallelBFS ParallelBFS.cxx)
+  IF (MPI_LIBRARY)
+    SET(MPI_LIBRARIES ${MPI_LIBRARY})
+  ENDIF (MPI_LIBRARY)
+  IF (MPI_EXTRA_LIBRARY)
+    SET(MPI_LIBRARIES ${MPI_LIBRARIES} "${MPI_EXTRA_LIBRARY}")
+  ENDIF (MPI_EXTRA_LIBRARY)
+  TARGET_LINK_LIBRARIES(ParallelBFS vtkParallel vtkViews  ${MPI_LIBRARIES})
+ENDIF(VTK_USE_PARALLEL_BGL)
